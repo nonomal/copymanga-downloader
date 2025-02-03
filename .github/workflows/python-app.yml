@@ -1,45 +1,48 @@
-name: python compile(Linux&Windows)
+name: Linux&Windows build
 
 on:
-  release:
-    types: [published]
   push:
     branches:
       - master
     paths-ignore:
       - '*.md'
-
+      - '*.json'
+      - '*.txt'
+      - '.github/workflows/*.yaml'
+      - 'setup.py'
+      - 'pyproject.toml'
+  workflow_dispatch:
 jobs:
   linux-build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.10
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: '3.10'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install pyinstaller
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      - name: Compile exe
+      - name: Compile bin
         run: |
-          pyinstaller -n copymanga-downloader -F main.py -i icon.ico
-      - name : upload exe
+          pyinstaller -n Linux-copymanga-downloader -F main.py -i icon.ico --onefile
+      - name: upload bin
         uses: actions/upload-artifact@master
         with:
           name: copymanga-downloader-Linux
-          path: dist/copymanga-downloader
-  
+          path: dist/
+
   windows-build:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.10
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: '3.10'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -49,37 +52,9 @@ jobs:
           }
       - name: Compile exe
         run: |
-          pyinstaller -n copymanga-downloader -F main.py -i icon.ico
-      - name : upload exe
+          pyinstaller -n Windows-copymanga-downloader -F main.py -i icon.ico --onefile
+      - name: upload exe
         uses: actions/upload-artifact@master
         with:
           name: copymanga-downloader-windows
-          path: dist/copymanga-downloader.exe
-          
-  macos-build:
-    runs-on: macos-latest
-    steps:
-      - name: Check out git repository
-        uses: actions/checkout@v2.4.2
-      
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v4.0.0
-        with:
-          python-version: "3.10"
-          
-      - name: Install dependencies
-        run: |
-          pip3 install pyinstaller
-          pip3 install -r requirements.txt
-          
-      - name: Compile
-        run: |
-          pyinstaller -F main.py
-          pyinstaller main.spec
-          
-      - name : upload artifact
-        uses: actions/upload-artifact@master
-        with:
-          name: macos-latest
-          path: dist/
-
+          path: dist/Windows-copymanga-downloader.exe
